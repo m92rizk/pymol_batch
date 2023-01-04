@@ -1,8 +1,6 @@
 #!/usr/bin/python3.8
 
 #SBATCH -p low
-#SBATCH -N 2
-#SBATCH -n 10
 #SBATCH -t 3:00:0
 #SBATCH -J rizk_pym
 #SBATCH -o slurm-%j.out
@@ -23,7 +21,7 @@ parser = OptionParser()
 parser.add_option("-l", "--ligand", dest="lig", help="ligand name, 3 letters")
 parser.add_option("-p", "--pdb", dest="pdb", help="pdb file, path")
 parser.add_option("-o", "--origin", dest="origin", default=" ", help="select (pdb name) where to shift the model, leaving this empty will not shift the model")
-parser.add_option("-d", "--directory", dest="directory", default="best_solution_1_group", help="directory where to look for merged data")
+parser.add_option("-d", "--directory", dest="directory", default=".", help="directory where to look for merged data, by default it takes current directory")
 parser.add_option("-e", "--depth", dest="depth", default="2",help="directory max depth to search in")
 parser.add_option("-v", "--setview", dest="view", default=" ", help="add view log file, leaving this empty will take default view of the ligand")
 parser.add_option("-c", "--setcolor", dest="color", default=" ",help="ligand color")
@@ -66,7 +64,7 @@ else:
     viewdata=" "
 
 #                                                          FINDING PATHS
-#print(str(options.directory))
+
 paths = []
 if (options.directory != ".") and (options.directory != "./"):
     mypath=options.mypath
@@ -125,7 +123,7 @@ else:
     print('============================================\n pdb does not exist, will download it')
     try:
         os.system('wget http://www.rcsb.org/pdb/files/'+str(pdbname)+'.pdb >/dev/null')
-        os.system('/data/id23eh2/inhouse/opid232/rizk/store/fixpdb.sh '+str(pdbname)+' '+str(LIG))
+        os.system('./fixpdb.sh '+str(pdbname)+' '+str(LIG))
 #        shutil.move(pdb, str(tmp)+'/')
     except:
         print("pdb name is not recognizable .. quitting")
@@ -146,7 +144,7 @@ else:
 #        shutil.copyfile('apo_'+str(pdbname)+'.pdb', str(tmp)+'/apo_'+str(pdbname)+'.pdb')
     else:
         print('============================================\n making the apo of the pdb')
-        os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+'  --apo >/dev/null')
+        os.system('./make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+'  --apo >/dev/null')
 
 #                                                          MTZ MAP INPUT 
 if options.mtz_map != "" :
@@ -202,9 +200,8 @@ for folder in sorted(paths):
             else:
                 print('============================================\n '+str(maptype)+'map.mtz doesnt exist\nrunning convert_mtz_hkl.py')
                 shutil.copyfile(str(folder)+'/'+str(options.hkl), str(options.hkl))
-                os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/convert_mtz_hkl.py '+str(hkl)+'>/dev/null')
+                os.system('./convert_mtz_hkl.py '+str(hkl)+'>/dev/null')
             print('============================================\n running get_phases_omit-full.py')
-            os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/get_phases_omit-full.py -l '+str(LIG)+' -p ../'+str(pdb)+' --refmac '+str(notomit)+' '+str(hkl)+' >/dev/null')
             shutil.copyfile(str(maptype)+'map.mtz', str(folder)+'/'+str(maptype)+'map.mtz')
             shutil.copyfile(str(maptype)+'refmacout_'+str(pdbname)+'.pdb', str(folder)+'/'+str(maptype)+'refmacout_'+str(pdbname)+'.pdb')
     else:
@@ -213,6 +210,7 @@ for folder in sorted(paths):
         shutil.copy(str(folder)+'/'+mapname+'.map', '.')
     if os.path.isfile(str(folder)+'/'+str(maptype)+'refmacout_'+str(pdbname)+'.pdb'):
         shutil.copy(str(folder)+'/'+str(maptype)+'refmacout_'+str(pdbname)+'.pdb', '.')
+
 # prepare .pym file
 
     with open('pym_'+str(LIG)+'.pml', 'w') as outpm:                               
@@ -259,7 +257,7 @@ set mesh_width, '+str(options.thick)+'\n\
         outpm.write('set ray_shadows=0\nset depth_cue=1\nset ray_trace_fog=1\nset orthoscopic=1\nset antialias=1\nbg_color white\nhide (hydro)\n')
     shutil.copyfile('pym_'+str(LIG)+'.pml', str(folder)+'/pym_'+str(LIG)+'_'+str(maptype)+str(mapname)+'.pml')
 
-# start pymol
+# starting pymol
 
 
     if options.photo is True:
@@ -268,9 +266,7 @@ set mesh_width, '+str(options.thick)+'\n\
         print('============================================\n running pymol')
         os.system('pymol -c pym_'+str(LIG)+'.pml >/dev/null ')
         os.system('convert -flatten image_'+str(LIG)+'.png image_'+str(LIG)+'-'+str(os.path.basename(folder))+str(maptype)+'.png')
-        #        while not os.path.exists('image_'+str(LIG)+'-'+str(os.path.basename(folder))+'.png'):
-        #           print('waiting the image..')
-        #           time.sleep(5)
+
         print('============================================\n exporting image')
         if dot == ".":
             #print('============================================\n exporting image')
@@ -297,13 +293,8 @@ set mesh_width, '+str(options.thick)+'\n\
             shutil.copyfile(str(LIG)+'.gif',  str(folder)+'/'+str(LIG)+'.gif')
             os.remove(str(LIG)+'.gif')
 
-    #if (os.getcwd().endswith(str(rand))):
-     #   print(os.getcwd())
-      #  for dele in os.listdir():
-       #     os.remove(dele)
             
 os.chdir(starting_directory)
-#print(os.getcwd())
 print("============================================\n removing "+str(tmp))
 os.system("rm -r "+tmp)
-#print("rm -r "+tmp)
+
