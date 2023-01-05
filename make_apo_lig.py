@@ -1,12 +1,7 @@
 #!/usr/bin/python
 
-#SBATCH -p nice
-#SBATCH -n 10
-#SBATCH -t 7:0:0
-#SBATCH -J rizk_stats
-
-import os, sys, re, shutil
-import numpy as np
+import os, sys, re, shutil, pathlib
+from pathlib import Path
 import copy
 from optparse import OptionParser
 
@@ -37,27 +32,28 @@ if options.pdb is None:
     pdb = raw_input ("Enter pdb name: ")
 else:
     pdb = options.pdb
+pdbname=Path(pdb).stem
 
-if os.path.isfile('./apo_'+str(pdb)+'.pdb') and apo is True :
-   os.remove('./apo_'+str(pdb)+'.pdb')
+if os.path.isfile('./apo_'+str(pdbname)+'.pdb') and apo is True :
+   os.remove('./apo_'+str(pdbname)+'.pdb')
 
 if os.path.isfile(str(LIG)+'.pdb') and compound is True :
    os.remove(str(LIG)+'.pdb')  
     
-file = open(str(pdb)+'.pdb', "r")
+file = open(pdb, "r")
 length = 0
 for line in file:
     if (re.search(str(LIG), line) and re.search("HETATM", line)) or (re.search(str(LIG), line) and re.search("ATOM", line)):
         val = str(line[21:22]) # val is the chain
         if str(val) != str(options.ch) and apo is True:
-           with open('apo_'+str(pdb)+'.pdb', "a") as outfile:
+           with open('apo_'+str(pdbname)+'.pdb', "a") as outfile:
                outfile.write(str(line))
         elif str(val) == str(options.ch) and compound is True:
             with open(str(LIG)+'.pdb', "a") as outfile:
                outfile.write(str(line))
     else:
         if apo is True:
-            with open('apo_'+str(pdb)+'.pdb', "a") as outfile:
+            with open('apo_'+str(pdbname)+'.pdb', "a") as outfile:
                 outfile.write(str(line))
     if not (re.search("HETATM", line) or re.search("ATOM", line)):
         if compound is True:
