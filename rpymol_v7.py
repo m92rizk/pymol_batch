@@ -138,7 +138,7 @@ else:
     print('============================================\n pdb does not exist, will download it')
     try:
         os.system('wget http://www.rcsb.org/pdb/files/'+str(pdbname)+'.pdb >/dev/null')
-        os.system('/data/id23eh2/inhouse/opid232/rizk/store/fixpdb.sh '+str(pdbname)+' '+str(LIG))
+        os.system('fixpdb.sh '+str(pdbname)+' '+str(LIG))
 #        shutil.move(pdb, str(tmp)+'/')
     except:
         print("pdb name is not recognizable .. quitting")
@@ -159,7 +159,7 @@ else:
 #        shutil.copyfile('apo_'+str(pdbname)+'.pdb', str(tmp)+'/apo_'+str(pdbname)+'.pdb')
     else:
         print('============================================\n making the apo of the pdb')
-        os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+'  --apo >APO_LIG.log')
+        os.system('make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+'  --apo >APO_LIG.log')
 
 #                                                          MTZ MAP INPUT 
 if options.fft_map != "" :
@@ -230,9 +230,9 @@ for folder in sorted(paths):
             else:
                 print('============================================\n '+str(maptype)+str(mtz_map)+' doesnt exist\nrunning convert_mtz_hkl.py')
                 shutil.copyfile(str(folder)+'/'+str(options.hkl), str(options.hkl))
-                os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/convert_mtz_hkl.py '+str(hkl)+'> '+str(folder)+'/'+'HKL_2_MTZ.log')
+                os.system('convert_mtz_hkl.py '+str(hkl)+'> '+str(folder)+'/'+'HKL_2_MTZ.log')
             print('============================================\n running get_phases_v4.py')
-            os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/get_phases_v4.py -l '+str(LIG)+' -p '+str(pdbfullpath)+' --'+str(options.refine)+' '+str(notomit)+' '+str(hkl)+' '+str(cif)+' > '+str(folder)+'/'+'PHASE.log')
+            os.system('get_phases_v4.py -l '+str(LIG)+' -p '+str(pdbfullpath)+' --'+str(options.refine)+' '+str(notomit)+' '+str(hkl)+' '+str(cif)+' > '+str(folder)+'/'+'PHASE.log')
             try:
                 shutil.copyfile(str(maptype)+str(mtz_map), str(folder)+'/'+str(maptype)+str(mtz_map))
                 shutil.copyfile(str(maptype)+str(pdbRefined), str(folder)+'/'+str(maptype)+str(pdbRefined))
