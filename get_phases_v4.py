@@ -64,12 +64,12 @@ if options.directory == "." :
     if os.path.isfile('../apo_'+str(pdb)) and not options.fullmap:
         print('apo '+str(pdb)+' already exists')
     elif not options.fullmap:
-        os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/make_apo_lig.py -l '+str(LIG)+' -p ../'+str(pdb)+' --apo')
+        os.system('make_apo_lig.py -l '+str(LIG)+' -p ../'+str(pdb)+' --apo')
         shutil.move('apo_'+str(pdb), '../apo_'+str(pdb))
     if os.path.isfile('junk_xdsconv.mtz'):
         print("Found junk_xdsconv.mtz")
     else:
-        os.system("/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/convert_mtz_hkl.py -f "+str(options.hklfile))
+        os.system("convert_mtz_hkl.py -f "+str(options.hklfile))
     if options.refmac is True:
         os.system('refmac5 hklin junk_xdsconv.mtz xyzin ../'+str(omit)+str(pdb)+' xyzout '+str(omit)+'refmac_refined'+str(pdbname)+'.pdb hklout '+str(mapname)+'refmac_refined'+str(pdbname)+'.mtz << eor \nncyc5\nmode rigid\nRIGIdbody NCYCle 5\neor')
     if options.phenix is True:
@@ -98,14 +98,14 @@ else:
     if os.path.isfile('apo_'+str(pdb)) and not options.fullmap:
         print('apo_'+str(pdb)+' already exists')
     elif not options.fullmap:
-        os.system('/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+' --apo')
+        os.system('make_apo_lig.py -l '+str(LIG)+' -p '+str(pdb)+' --apo')
     for folder in os.listdir(dir):
         if folder.startswith(str(options.directory)):
             os.chdir(str(dir)+'/'+str(folder))
             if os.path.isfile('junk_xdsconv.mtz'):
                 print("Found junk_xdsconv.mtz")
             else:
-                os.system("/data/id23eh2/inhouse/opid232/rizk/real_data/pyt_getstats/convert_mtz_hkl.py -f "+str(options.hklfile))
+                os.system("convert_mtz_hkl.py -f "+str(options.hklfile))
             if options.refmac is True:
                 os.system('refmac5 hklin junk_xdsconv.mtz xyzin ../'+str(omit)+str(pdb)+' xyzout  '+str(omit)+'refmac_refined'+str(pdbname)+'.pdb hklout '+str(mapname)+'refmac_refined'+str(pdbname)+'.mtz << eor \nncyc5\nmode rigid\nRIGIdbody NCYCle 5\neor')
             if options.phenix is True:
